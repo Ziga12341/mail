@@ -1,7 +1,15 @@
+.idea
+.gitignore
+LICENSE
+.git
+.gitattributes
+.gitmodules
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+README.md
+*.md
 
 # C extensions
 *.so
