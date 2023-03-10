@@ -1,5 +1,13 @@
-document.addEventListener('DOMContentLoaded', function() {
+/*
+Using JavaScript, HTML, and CSS, complete the implementation of your single-page-app email client inside of inbox.js (and not additional or other files; for grading purposes, we’re only going to be considering inbox.js!). You must fulfill the following requirements:
 
+Send Mail: When a user submits the email composition form, add JavaScript code to actually send the email.
+You’ll likely want to make a POST request to /emails, passing in values for recipients, subject, and body.
+Once the email has been sent, load the user’s sent mailbox.
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Three different views: inbox, sent, and archive
   // Use buttons to toggle between views
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
@@ -20,8 +28,35 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+
+
+  // Add functionality to button to send the email
+  document.querySelector('#compose-form').addEventListener('submit', function() {
+    // Get the values from the form
+    const recipients = document.querySelector('#compose-recipients').value;
+    const subject = document.querySelector('#compose-subject').value;
+    const body = document.querySelector('#compose-body').value;
+
+    // Send the email
+    fetch('/emails', {
+      method: 'POST',
+      body: JSON.stringify({
+          recipients: recipients,
+          subject: subject,
+          body: body
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      // Print result
+      console.log(result);
+    });
+  })
 }
 
+
+
+// Add functionality to show any of three inboxes: inbox, sent, and archive
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
@@ -30,4 +65,6 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  // Fetch the emails
 }

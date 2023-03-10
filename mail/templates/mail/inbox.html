@@ -4,6 +4,9 @@
 {% block body %}
     <h2>{{ request.user.email }}</h2>
 
+    <!-- The buttons below, need to selectively show and hide views: the compose button, for example,
+     should hide the emails-view and show the compose-view; the inbox button, meanwhile,
+      should hide the compose-view and show the emails-view. -->
     <button class="btn btn-sm btn-outline-primary" id="inbox">Inbox</button>
     <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
     <button class="btn btn-sm btn-outline-primary" id="sent">Sent</button>
@@ -11,12 +14,14 @@
     <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
     <hr>
 
+    <!-- Need to add the content of an email mailbox inside div which id="emails-view" -->
     <div id="emails-view">
     </div>
 
+    <!-- contains a form where the user can compose a new email inside div which id="email-view" -->
     <div id="compose-view">
         <h3>New Email</h3>
-        <form id="compose-form">
+        <form id="compose-form" {% url 'compose' %}>
             <div class="form-group">
                 From: <input disabled class="form-control" value="{{ request.user.email }}">
             </div>
@@ -32,6 +37,7 @@
     </div>
 {% endblock %}
 
+<!-- JavaScript file below -->
 {% block script %}
     <script src="{% static 'mail/inbox.js' %}"></script>
 {% endblock %}
