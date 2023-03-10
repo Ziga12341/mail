@@ -6,6 +6,8 @@ You’ll likely want to make a POST request to /emails, passing in values for re
 Once the email has been sent, load the user’s sent mailbox.
  */
 
+// if post request compose email then Load the user’s sent mailbox
+
 document.addEventListener('DOMContentLoaded', function() {
   // Three different views: inbox, sent, and archive
   // Use buttons to toggle between views
@@ -14,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
+  // if form is submitted, go to send email  load_mailbox(sent)
+  document.querySelector('#compose-form').addEventListener('submit', () => load_mailbox('sent'));
   // By default, load the inbox
   load_mailbox('inbox');
 });
@@ -31,6 +35,7 @@ function compose_email() {
 
 
   // Add functionality to button to send the email
+  // Once the email has been sent, load the user’s sent mailbox.
   document.querySelector('#compose-form').addEventListener('submit', function() {
     // Get the values from the form
     const recipients = document.querySelector('#compose-recipients').value;
