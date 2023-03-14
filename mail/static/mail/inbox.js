@@ -1,9 +1,12 @@
 /*
 Using JavaScript, HTML, and CSS, complete the implementation of your single-page-app email client inside of inbox.js (and not additional or other files; for grading purposes, we’re only going to be considering inbox.js!). You must fulfill the following requirements:
 
-Send Mail: When a user submits the email composition form, add JavaScript code to actually send the email.
-You’ll likely want to make a POST request to /emails, passing in values for recipients, subject, and body.
-Once the email has been sent, load the user’s sent mailbox.
+View Email: When a user clicks on an email, the user should be taken to a view where they see the content of that email.
+You’ll likely want to make a GET request to /emails/<email_id> to request the email.
+Your application should show the email’s sender, recipients, subject, timestamp, and body.
+You’ll likely want to add an additional div to inbox.html (in addition to emails-view and compose-view) for displaying the email. Be sure to update your code to hide and show the right views when navigation options are clicked.
+See the hint in the Hints section about how to add an event listener to an HTML element that you’ve added to the DOM.
+Once the email has been clicked on, you should mark the email as read. Recall that you can send a PUT request to /emails/<email_id> to update whether an email is read or not.
  */
 
 // if post request compose email then Load the user’s sent mailbox
@@ -24,6 +27,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#detail-email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -43,6 +47,24 @@ function compose_email() {
     const recipients = document.querySelector('#compose-recipients').value;
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
+
+    /*
+    Jernej' OR 1=1; ; ; ; /*
+    Jernej" OR 1=1; --
+
+    me = query.get('me')
+
+    mysql.query("
+        select * from emails; --
+    ")
+    stmt = mysql.preparedStatement("
+        select *
+        from emails
+        where sender = [me] and recipients = ? and subject = ? and body = ?
+        and timestamp = ? and read = ? and archived = ?
+    ",
+
+    */
 
     // Send the email
     fetch('/emails', {
@@ -96,7 +118,6 @@ function compose_email() {
  *
  * How would you get access to such values in JavaScript? Recall that in JavaScript, you can use fetch to make a web request. Therefore, the following JavaScript code
  * @param mailbox type of mailbox inbox, sent, or archive - string
- * @returns {Promise<void>}
  * fetch('/emails/inbox')
  *    .then(response => response.json())
  *    .then(emails => {
@@ -108,6 +129,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#detail-email-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -115,59 +137,52 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
       .then(response => response.json())
       .then(emails => {
+        const emailTable = document.createElement('table');
+        emailTable.className = 'table table-bordered';
+        const emailTableBody = document.createElement('tbody');
+        emailTable.append(emailTableBody);
+
         emails.forEach(email =>{
           // emails
           email.archived = false;
           const sender = email.sender;
           const subject = email.subject;
-          const body = email.body;
           const timestamp = email.timestamp;
           const read = email.read;
-          const archived = email.archived;
           const recipients = email.recipients;
 
           // Print each email in console
           // Create a div element for each email
           // Use bootstrap table to display the emails
-          // do not use inerHTML
           // td = table data, tr = table row
 
           // Create a row for the column names
-          const emailTable = document.createElement('table');
-          emailTable.className = 'table table-bordered';
-          const emailTableHead = document.createElement('thead');
-          const emailTableBody = document.createElement('tbody');
           const emailTableRow = document.createElement('tr');
-          const emailTableDataSender = document.createElement('td');
-          const emailTableDataRecipient = document.createElement('td');
-          const emailTableDataSubject = document.createElement('td');
-          const emailTableDataTimestamp = document.createElement('td');
-          const emailTableDataRead = document.createElement('td');
-
-          // if the email is read, change the background color to grey
-          if (read) {
-              emailTableRow.className = 'table-secondary';
-            }
-
-          // Add the sender, subject, timestamp, and read to the table
-          emailTableDataSender.innerHTML = sender;
-          emailTableDataRecipient.innerHTML = recipients;
-          emailTableDataSubject.innerHTML = subject;
-          emailTableDataTimestamp.innerHTML = timestamp;
-          emailTableDataRead.innerHTML = read;
+          emailTableBody.append(emailTableRow);
+          // Add link to the email
+          emailTableRow.addEventListener('click', function (event) {
+            console.log(`Email ${email.id} was clicked!`);
+              // Show the mailbox and hide other views
+            document.querySelector('#compose-view').style.display = 'none';
+            document.querySelector('#emails-view').style.display = 'none';
+            document.querySelector('#detail-email-view').style.display = 'block';
+            view_mail(email.id)
+          });
 
           // Append the table data to the table row
           if (mailbox === 'sent') {
-            emailTableRow.append(emailTableDataRecipient)
-          }
+            emailTableRow.append(el('td', recipients));          }
           else {
-          emailTableRow.append(emailTableDataSender);
+            emailTableRow.append(el('td', sender));
           }
-          emailTableRow.append(emailTableDataSubject);
-          emailTableRow.append(emailTableDataTimestamp);
+          emailTableRow.append(el('td', subject));
+          emailTableRow.append(el('td', timestamp));
 
-          emailTableBody.append(emailTableRow);
-          emailTable.append(emailTableBody);
+          // if the email is read, change the background color to grey
+          // HTML DOM API, url
+          if (read) {
+            emailTableRow.className = 'table-secondary';
+          }
 
           // Append the table to the emails view
           document.querySelector('#emails-view').append(emailTable);
@@ -175,4 +190,52 @@ function load_mailbox(mailbox) {
 
         });
       });
+}
+
+// When a user clicks on an email, the user should be taken to a view where they see the content of that email.
+
+function view_mail(id){
+  fetch(`/emails/${id}`)
+    .then(response => response.json())
+    .then(email => {
+      const parent = document.querySelector('#detail-email-view')
+      parent.replaceChildren();
+      parent.append(label_text('From: ', email.sender));
+      parent.append(label_text('To: ', email.recipients.join(', ')));
+      parent.append(label_text('Subject: ', email.subject));
+      parent.append(label_text('Timestamp: ', email.timestamp));
+
+      const button = document.createElement('button');
+      button.textContent = 'Reply';
+      parent.append(button);
+      button.addEventListener('click', () => {
+        compose_email();
+        document.querySelector('#compose-recipients').value = sender;
+        document.querySelector('#compose-subject').value = `Re: ${subject}`;
+        document.querySelector('#compose-body').value = `On ${timestamp} ${sender} wrote: ${body}`;
+      });
+
+      parent.append(el('hr'));
+      parent.append(el('p', email.body));
+
+    });
+
+}
+
+// function that creates a HTML element and adds a text to it
+function el(tag, text) {
+  const element = document.createElement(tag);
+  if (text) {
+      element.textContent = text;
+  }
+  return element;
+}
+
+function label_text(label, text) {
+  const p = document.createElement('p');
+  const label_element = document.createElement('b');
+  label_element.textContent = label;
+  p.append(label_element);
+  p.append(text);
+  return p;
 }
