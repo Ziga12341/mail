@@ -118,17 +118,15 @@ function load_mailbox(mailbox) {
         emails.forEach(email =>{
           // emails
           email.archived = false;
-          email.read = false;
           const sender = email.sender;
           const subject = email.subject;
           const body = email.body;
           const timestamp = email.timestamp;
           const read = email.read;
           const archived = email.archived;
+          const recipients = email.recipients;
 
           // Print each email in console
-          console.log(email);
-
           // Create a div element for each email
           // Use bootstrap table to display the emails
           // do not use inerHTML
@@ -136,46 +134,45 @@ function load_mailbox(mailbox) {
 
           // Create a row for the column names
           const emailTable = document.createElement('table');
-          emailTable.className = 'table table-sm';
+          emailTable.className = 'table table-bordered';
           const emailTableHead = document.createElement('thead');
           const emailTableBody = document.createElement('tbody');
           const emailTableRow = document.createElement('tr');
-          if(read === true) {
-            emailTableRow.className = 'table-active';
-            }
           const emailTableDataSender = document.createElement('td');
+          const emailTableDataRecipient = document.createElement('td');
           const emailTableDataSubject = document.createElement('td');
           const emailTableDataTimestamp = document.createElement('td');
           const emailTableDataRead = document.createElement('td');
 
-          // Create a row for the column names
-          const emailTableHeaderRow = document.createElement('tr');
-          const emailTableHeaderSender = document.createElement('th');
-          const emailTableHeaderSubject = document.createElement('th');
-          const emailTableHeaderTimestamp = document.createElement('th');
-          const emailTableHeaderRead = document.createElement('th');
+          // if the email is read, change the background color to grey
+          if (read) {
+              emailTableRow.className = 'table-secondary';
+            }
 
           // Add the sender, subject, timestamp, and read to the table
           emailTableDataSender.innerHTML = sender;
+          emailTableDataRecipient.innerHTML = recipients;
           emailTableDataSubject.innerHTML = subject;
           emailTableDataTimestamp.innerHTML = timestamp;
           emailTableDataRead.innerHTML = read;
 
           // Append the table data to the table row
+          if (mailbox === 'sent') {
+            emailTableRow.append(emailTableDataRecipient)
+          }
+          else {
           emailTableRow.append(emailTableDataSender);
+          }
           emailTableRow.append(emailTableDataSubject);
           emailTableRow.append(emailTableDataTimestamp);
-          emailTableRow.append(emailTableDataRead);
 
           emailTableBody.append(emailTableRow);
           emailTable.append(emailTableBody);
 
-          // Append the table head to the table
-          emailTable.append(emailTableHead);
-
           // Append the table to the emails view
           document.querySelector('#emails-view').append(emailTable);
+          console.log(email);
 
         });
-        });
+      });
 }
