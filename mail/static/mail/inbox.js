@@ -162,11 +162,14 @@ function load_mailbox(mailbox) {
           // Add link to the email
           emailTableRow.addEventListener('click', function (event) {
             console.log(`Email ${email.id} was clicked!`);
-              // Show the mailbox and hide other views
+            // Change the read status to true
+            // Show the mailbox and hide other views
             document.querySelector('#compose-view').style.display = 'none';
             document.querySelector('#emails-view').style.display = 'none';
             document.querySelector('#detail-email-view').style.display = 'block';
+            mark_email_as_read(email.id)
             view_mail(email.id)
+
           });
 
           // Append the table data to the table row
@@ -238,4 +241,13 @@ function label_text(label, text) {
   p.append(label_element);
   p.append(text);
   return p;
+}
+
+function mark_email_as_read(id) {
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  });
 }
