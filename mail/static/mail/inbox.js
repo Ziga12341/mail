@@ -1,12 +1,10 @@
 /*
 Using JavaScript, HTML, and CSS, complete the implementation of your single-page-app email client inside of inbox.js (and not additional or other files; for grading purposes, we’re only going to be considering inbox.js!). You must fulfill the following requirements:
 
-View Email: When a user clicks on an email, the user should be taken to a view where they see the content of that email.
-You’ll likely want to make a GET request to /emails/<email_id> to request the email.
-Your application should show the email’s sender, recipients, subject, timestamp, and body.
-You’ll likely want to add an additional div to inbox.html (in addition to emails-view and compose-view) for displaying the email. Be sure to update your code to hide and show the right views when navigation options are clicked.
-See the hint in the Hints section about how to add an event listener to an HTML element that you’ve added to the DOM.
-Once the email has been clicked on, you should mark the email as read. Recall that you can send a PUT request to /emails/<email_id> to update whether an email is read or not.
+Archive and Unarchive: Allow users to archive and unarchive emails that they have received.
+When viewing an Inbox email, the user should be presented with a button that lets them archive the email. When viewing an Archive email, the user should be presented with a button that lets them unarchive the email. This requirement does not apply to emails in the Sent mailbox.
+Recall that you can send a PUT request to /emails/<email_id> to mark an email as archived or unarchived.
+Once an email has been archived or unarchived, load the user’s inbox.
  */
 
 // if post request compose email then Load the user’s sent mailbox
@@ -48,24 +46,6 @@ function compose_email() {
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
 
-    /*
-    Jernej' OR 1=1; ; ; ; /*
-    Jernej" OR 1=1; --
-
-    me = query.get('me')
-
-    mysql.query("
-        select * from emails; --
-    ")
-    stmt = mysql.preparedStatement("
-        select *
-        from emails
-        where sender = [me] and recipients = ? and subject = ? and body = ?
-        and timestamp = ? and read = ? and archived = ?
-    ",
-
-    */
-
     // Send the email
     fetch('/emails', {
       method: 'POST',
@@ -84,45 +64,7 @@ function compose_email() {
   })
 }
 
-
-
 // Add functionality to show any of three inboxes: inbox, sent, and archive
-/**
- * Load mailbox
- * GET /emails/<str:mailbox>
- * Sending a GET request to /emails/<mailbox> where <mailbox> is either inbox, sent, or archive will return back to you (in JSON form) a list of all emails in that mailbox, in reverse chronological order. For example, if you send a GET request to /emails/inbox, you might get a JSON response like the below (representing two emails):
- *
- * [
- *     {
- *         "id": 100,
- *         "sender": "foo@example.com",
- *         "recipients": ["bar@example.com"],
- *         "subject": "Hello!",
- *         "body": "Hello, world!",
- *         "timestamp": "Jan 2 2020, 12:00 AM",
- *         "read": false,
- *         "archived": false
- *     },
- *     {
- *         "id": 95,
- *         "sender": "baz@example.com",
- *         "recipients": ["bar@example.com"],
- *         "subject": "Meeting Tomorrow",
- *         "body": "What time are we meeting?",
- *         "timestamp": "Jan 1 2020, 12:00 AM",
- *         "read": true,
- *         "archived": false
- *     }
- * ]
- * Notice that each email specifies its id (a unique identifier), a sender email address, an array of recipients, a string for subject, body, and timestamp, as well as two boolean values indicating whether the email has been read and whether the email has been archived.
- *
- * How would you get access to such values in JavaScript? Recall that in JavaScript, you can use fetch to make a web request. Therefore, the following JavaScript code
- * @param mailbox type of mailbox inbox, sent, or archive - string
- * fetch('/emails/inbox')
- *    .then(response => response.json())
- *    .then(emails => {
- *    // Print emails
- */
 function load_mailbox(mailbox) {
   console.log(`Loading ${mailbox} mailbox...`);
 
