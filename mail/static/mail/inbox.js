@@ -116,18 +116,45 @@ function load_mailbox(mailbox) {
 
           // Append the table data to the table row
           if (mailbox === 'sent') {
-            emailTableRow.append(el('td', recipients));          }
+            emailTableRow.append(add_text_to_element('td', recipients));          }
           else {
-            emailTableRow.append(el('td', sender));
+            emailTableRow.append(add_text_to_element('td', sender));
           }
-          emailTableRow.append(el('td', subject));
-          emailTableRow.append(el('td', timestamp));
+          emailTableRow.append(add_text_to_element('td', subject));
+          emailTableRow.append(add_text_to_element('td', timestamp));
 
+          // Add button to archive or unarchive the email
+          // Arhive on inbox, unarchive on archive
+
+          const archiveButton = document.createElement('button');
+          archiveButton.className = 'btn btn-outline-primary';
+            if (mailbox === 'inbox') {
+                archiveButton.textContent = 'Archive';
+                archiveButton.addEventListener('click', function (event) {
+                    console.log('Archive button clicked')
+                    emailTableRow.append(add_text_to_element('td', archiveButton));
+
+
+                    archive_email(email.id);
+                });
+            }
+            else if (mailbox === 'archive') {
+                archiveButton.textContent = 'Unarchive';
+                archiveButton.addEventListener('click', function (event) {
+                    emailTableRow.append(add_text_to_element('td', archiveButton));
+                    unarchive_email(email.id);
+                });
+            }
+            // else do nothing
+            else {
+                archiveButton.innerHTML = '';
+            }
           // if the email is read, change the background color to grey
           // HTML DOM API, url
           if (read) {
             emailTableRow.className = 'table-secondary';
           }
+          emailTableRow.append(add_text_to_element('td', archiveButton));
 
           // Append the table to the emails view
           document.querySelector('#emails-view').append(emailTable);
@@ -155,20 +182,20 @@ function view_mail(id){
       parent.append(button);
       button.addEventListener('click', () => {
         compose_email();
-        document.querySelector('#compose-recipients').value = sender;
-        document.querySelector('#compose-subject').value = `Re: ${subject}`;
-        document.querySelector('#compose-body').value = `On ${timestamp} ${sender} wrote: ${body}`;
+        document.querySelector('#compose-recipients').value = email.sender;
+        document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
+        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
       });
 
-      parent.append(el('hr'));
-      parent.append(el('p', email.body));
+      parent.append(add_text_to_element('hr'));
+      parent.append(add_text_to_element('p', email.body));
 
     });
 
 }
 
 // function that creates a HTML element and adds a text to it
-function el(tag, text) {
+function add_text_to_element(tag, text) {
   const element = document.createElement(tag);
   if (text) {
       element.textContent = text;
@@ -192,4 +219,29 @@ function mark_email_as_read(id) {
         read: true
     })
   });
+}
+
+// function that archives an email
+function archive_email(id) {
+    fetch(`/emails/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            archived: true
+        })
+    })
+    .then(() => {
+        load_mailbox('inbox');
+    });
+}
+// function that unarchives an email
+function unarchive_email(id) {
+    fetch(`/emails/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            archived: false
+        })
+    })
+    .then(() => {
+        load_mailbox('inbox');
+    });
 }
