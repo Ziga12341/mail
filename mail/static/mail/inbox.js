@@ -77,80 +77,80 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
   // Fetch the emails
   fetch(`/emails/${mailbox}`)
+
       .then(response => response.json())
       .then(emails => {
-        const emailTable = document.createElement('table');
-        emailTable.className = 'table table-bordered';
-        const emailTableBody = document.createElement('tbody');
-        emailTable.append(emailTableBody);
 
-        emails.forEach(email =>{
-          // emails
-          email.archived = false;
-          const sender = email.sender;
-          const subject = email.subject;
-          const timestamp = email.timestamp;
-          const read = email.read;
-          const recipients = email.recipients;
-          const button = document.createElement('button');
+          const emailTable = document.createElement('table');
+          emailTable.className = 'table table-bordered';
+          const emailTableBody = document.createElement('tbody');
+          emailTable.append(emailTableBody);
 
-          // Print each email in console
-          // Create a div element for each email
-          // Use bootstrap table to display the emails
-          // td = table data, tr = table row
+          emails.forEach(email =>{
+              // do something with each email
+              const sender = email.sender;
+              const subject = email.subject;
+              const timestamp = email.timestamp;
+              const read = email.read;
+              const recipients = email.recipients;
+              const button = document.createElement('button');
+              button.className = 'btn btn-primary';
 
-          // Create a row for the column names
-          const emailTableRow = document.createElement('tr');
-          emailTableBody.append(emailTableRow);
-          // Add link to the email
-          emailTableRow.append(button);
+              // Print each email in console
+              // Create a row for the column names
+              const emailTableRow = document.createElement('tr');
+              emailTableBody.append(emailTableRow);
+              // Add link to the email
 
-          emailTableRow.addEventListener('click', function (event) {
-            console.log(`Email ${email.id} was clicked!`);
-            // Change the read status to true
-            // Show the mailbox and hide other views
-            document.querySelector('#compose-view').style.display = 'none';
-            document.querySelector('#emails-view').style.display = 'none';
-            document.querySelector('#detail-email-view').style.display = 'block';
-            mark_email_as_read(email.id)
-            view_mail(email.id)
+              emailTableRow.addEventListener('click', function (event) {
+                  console.log(`Email ${email.id} was clicked!`);
+                  // Change the read status to true
+                  // Show the mailbox and hide other views
+                  document.querySelector('#compose-view').style.display = 'none';
+                  document.querySelector('#emails-view').style.display = 'none';
+                  document.querySelector('#detail-email-view').style.display = 'block';
+                  mark_email_as_read(email.id)
+                  view_mail(email.id)
+              });
 
-          });
+              if (mailbox === 'sent') {
+                  emailTableRow.append(add_text_to_element('td', recipients));
+                  emailTableRow.append(add_text_to_element('td', subject));
+                  emailTableRow.append(add_text_to_element('td', timestamp));
+                }
 
-            // Add a button to archive or unarchive the email
-            button.addEventListener('click', function (event) {
-              console.log(`Button ${email.id} was clicked!`);
-              // Change the read status to true
-              // Show the mailbox and hide other views
-              if (mailbox === 'inbox') {
-                archive_email(email.id)
-              }
               else if (mailbox === 'archive') {
-                unarchive_email(email.id)
+                  emailTableRow.append(add_text_to_element('td', recipients));
+                  emailTableRow.append(add_text_to_element('td', subject));
+                  emailTableRow.append(add_text_to_element('td', timestamp));
+                  button.textContent = 'Unarchive';
+                  emailTableRow.append(button);
+                  button.addEventListener('click', function (event) {
+                        console.log(`Email ${email.id} was clicked!`);
+                        unarchive_email(email.id)
+                  });
+                }
+              else {
+                  emailTableRow.append(add_text_to_element('td', sender));
+                  emailTableRow.append(add_text_to_element('td', subject));
+                  emailTableRow.append(add_text_to_element('td', timestamp));
+                  button.textContent = 'Archive';
+                  emailTableRow.append(button);
+                  button.addEventListener('click', function (event) {
+                        console.log(`Email ${email.id} was clicked!`);
+                        archive_email(email.id)
+                  });
               }
-            }
-            )
 
-          // Append the table data to the table row
-          if (mailbox === 'sent') {
-            emailTableRow.append(add_text_to_element('td', recipients));          }
-          else {
-            emailTableRow.append(add_text_to_element('td', sender));
-          }
-          emailTableRow.append(add_text_to_element('td', subject));
-          emailTableRow.append(add_text_to_element('td', timestamp));
-
-          // if the email is read, change the background color to grey
-          // HTML DOM API, url
-          if (read) {
-            emailTableRow.className = 'table-secondary';
-          }
-
-          // Append the table to the emails view
-          document.querySelector('#emails-view').append(emailTable);
-          console.log(email);
-
-        });
+              // if the email is read, change the background color to grey
+              // HTML DOM API, url
+              if (read) {
+                  emailTableRow.className = 'table-secondary';
+              }
+              // Append the table to the emails view
+              document.querySelector('#emails-view').append(emailTable);
+              console.log(email);
+          });
       });
 }
 
