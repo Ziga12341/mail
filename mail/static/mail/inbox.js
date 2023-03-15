@@ -92,6 +92,7 @@ function load_mailbox(mailbox) {
           const timestamp = email.timestamp;
           const read = email.read;
           const recipients = email.recipients;
+          const button = document.createElement('button');
 
           // Print each email in console
           // Create a div element for each email
@@ -102,6 +103,8 @@ function load_mailbox(mailbox) {
           const emailTableRow = document.createElement('tr');
           emailTableBody.append(emailTableRow);
           // Add link to the email
+          emailTableRow.append(button);
+
           emailTableRow.addEventListener('click', function (event) {
             console.log(`Email ${email.id} was clicked!`);
             // Change the read status to true
@@ -114,6 +117,20 @@ function load_mailbox(mailbox) {
 
           });
 
+            // Add a button to archive or unarchive the email
+            button.addEventListener('click', function (event) {
+              console.log(`Button ${email.id} was clicked!`);
+              // Change the read status to true
+              // Show the mailbox and hide other views
+              if (mailbox === 'inbox') {
+                archive_email(email.id)
+              }
+              else if (mailbox === 'archive') {
+                unarchive_email(email.id)
+              }
+            }
+            )
+
           // Append the table data to the table row
           if (mailbox === 'sent') {
             emailTableRow.append(add_text_to_element('td', recipients));          }
@@ -123,38 +140,11 @@ function load_mailbox(mailbox) {
           emailTableRow.append(add_text_to_element('td', subject));
           emailTableRow.append(add_text_to_element('td', timestamp));
 
-          // Add button to archive or unarchive the email
-          // Arhive on inbox, unarchive on archive
-
-          const archiveButton = document.createElement('button');
-          archiveButton.className = 'btn btn-outline-primary';
-            if (mailbox === 'inbox') {
-                archiveButton.textContent = 'Archive';
-                archiveButton.addEventListener('click', function (event) {
-                    console.log('Archive button clicked')
-                    emailTableRow.append(add_text_to_element('td', archiveButton));
-
-
-                    archive_email(email.id);
-                });
-            }
-            else if (mailbox === 'archive') {
-                archiveButton.textContent = 'Unarchive';
-                archiveButton.addEventListener('click', function (event) {
-                    emailTableRow.append(add_text_to_element('td', archiveButton));
-                    unarchive_email(email.id);
-                });
-            }
-            // else do nothing
-            else {
-                archiveButton.innerHTML = '';
-            }
           // if the email is read, change the background color to grey
           // HTML DOM API, url
           if (read) {
             emailTableRow.className = 'table-secondary';
           }
-          emailTableRow.append(add_text_to_element('td', archiveButton));
 
           // Append the table to the emails view
           document.querySelector('#emails-view').append(emailTable);
