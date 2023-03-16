@@ -1,14 +1,3 @@
-/*
-Using JavaScript, HTML, and CSS, complete the implementation of your single-page-app email client inside of inbox.js (and not additional or other files; for grading purposes, we’re only going to be considering inbox.js!). You must fulfill the following requirements:
-
-Reply: Allow users to reply to an email.
-When viewing an email, the user should be presented with a “Reply” button that lets them reply to the email.
-When the user clicks the “Reply” button, they should be taken to the email composition form.
-Pre-fill the composition form with the recipient field set to whoever sent the original email.
-Pre-fill the subject line. If the original email had a subject line of foo, the new subject line should be Re: foo. (If the subject line already begins with Re: , no need to add it again.)
-Pre-fill the body of the email with a line like "On Jan 1 2020, 12:00 AM foo@example.com wrote:" followed by the original text of the email.
- */
-
 // if post request compose email then Load the user’s sent mailbox
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -19,27 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
-  // By default, load the inbox
-  load_mailbox('inbox');
-});
-
-function compose_email() {
-
-  // Show compose view and hide other views
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#detail-email-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'block';
-
-  // Clear out composition fields
-  document.querySelector('#compose-recipients').value = '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
-
-
-  // Add functionality to button to send the email
-  // Once the email has been sent, load the user’s sent mailbox.
-  // if form is submitted, go to send email  load_mailbox(sent), if form is not submitted, go to inbox
-
+  // When a user submits the email composition form, add JavaScript code that sends an email.
   document.querySelector('#compose-form').addEventListener('submit', function (event) {
     // Prevent the default form submission behavior
     event.preventDefault();
@@ -64,9 +33,26 @@ function compose_email() {
           load_mailbox('sent')
         });
   })
+
+  // By default, load the inbox
+  load_mailbox('inbox');
+});
+
+// Function compose_email() compose an email
+function compose_email() {
+
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#detail-email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+
+  // Clear out composition fields
+  document.querySelector('#compose-recipients').value = '';
+  document.querySelector('#compose-subject').value = '';
+  document.querySelector('#compose-body').value = '';
 }
 
-// Add functionality to show any of three inboxes: inbox, sent, and archive
+// Load three inboxes: inbox, sent, and archive
 function load_mailbox(mailbox) {
   console.log(`Loading ${mailbox} mailbox...`);
 
@@ -102,8 +88,8 @@ function load_mailbox(mailbox) {
               // Create a row for the column names
               const emailTableRow = document.createElement('tr');
               emailTableBody.append(emailTableRow);
-              // Add link to the email
 
+              // When click on email row, show the detail email
               emailTableRow.addEventListener('click', function (event) {
                   console.log(`Email ${email.id} was clicked!`);
                   // Change the read status to true
@@ -115,6 +101,7 @@ function load_mailbox(mailbox) {
                   view_mail(email.id)
               });
 
+              // do not show the archive button in the sent mailbox
               if (mailbox === 'sent') {
                   add_elements_to_table_row(emailTableRow, recipients, subject, timestamp)
                 }
@@ -137,8 +124,7 @@ function load_mailbox(mailbox) {
                   });
               }
 
-              // if the email is read, change the background color to grey
-              // HTML DOM API, url
+              // if the email is read, background color changes to grey
               if (read) {
                   emailTableRow.className = 'table-secondary';
               }
@@ -150,36 +136,37 @@ function load_mailbox(mailbox) {
 }
 
 // When a user clicks on an email, the user should be taken to a view where they see the content of that email.
+// function view_mail(id) shows the detail email
 
 function view_mail(id){
-  fetch(`/emails/${id}`)
-    .then(response => response.json())
-    .then(email => {
-      const parent = document.querySelector('#detail-email-view')
-      parent.replaceChildren();
-      parent.append(label_text('From: ', email.sender));
-      parent.append(label_text('To: ', email.recipients.join(', ')));
-      parent.append(label_text('Subject: ', email.subject));
-      parent.append(label_text('Timestamp: ', email.timestamp));
+    fetch(`/emails/${id}`)
+        .then(response => response.json())
+        .then(email => {
+            const parent = document.querySelector('#detail-email-view')
+            parent.replaceChildren();
+            parent.append(label_text('From: ', email.sender));
+            parent.append(label_text('To: ', email.recipients.join(', ')));
+            parent.append(label_text('Subject: ', email.subject));
+            parent.append(label_text('Timestamp: ', email.timestamp));
 
-      const button = document.createElement('button');
-      button.textContent = 'Reply';
-      button.className = 'btn btn-primary';
-      parent.append(button);
-      button.addEventListener('click', () => {
-        compose_email();
-        document.querySelector('#compose-recipients').value = email.sender;
-        if (!email.subject.startsWith('Re: ')) {
-          email.subject = `Re: ${email.subject}`;
-        }
-        document.querySelector('#compose-subject').value = email.subject;
-        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
-      });
+            const replyButton = document.createElement('button');
+            replyButton.textContent = 'Reply';
+            replyButton.className = 'btn btn-primary';
+            parent.append(replyButton);
+            replyButton.addEventListener('click', () => {
+                compose_email();
+                document.querySelector('#compose-recipients').value = email.sender;
+                if (!email.subject.startsWith('Re: ')) {
+                  email.subject = `Re: ${email.subject}`;
+                }
+                document.querySelector('#compose-subject').value = email.subject;
+                document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
+            });
 
-      parent.append(add_text_to_element('hr'));
-      parent.append(add_text_to_element('p', email.body));
+            parent.append(add_text_to_element('hr'));
+            parent.append(add_text_to_element('p', email.body));
 
-    });
+          });
 
 }
 
