@@ -116,15 +116,10 @@ function load_mailbox(mailbox) {
               });
 
               if (mailbox === 'sent') {
-                  emailTableRow.append(add_text_to_element('td', recipients));
-                  emailTableRow.append(add_text_to_element('td', subject));
-                  emailTableRow.append(add_text_to_element('td', timestamp));
+                  add_elements_to_table_row(emailTableRow, recipients, subject, timestamp)
                 }
-
               else if (mailbox === 'archive') {
-                  emailTableRow.append(add_text_to_element('td', recipients));
-                  emailTableRow.append(add_text_to_element('td', subject));
-                  emailTableRow.append(add_text_to_element('td', timestamp));
+                  add_elements_to_table_row(emailTableRow, sender, subject, timestamp)
                   button.textContent = 'Unarchive';
                   emailTableRow.append(button);
                   button.addEventListener('click', function (event) {
@@ -133,9 +128,7 @@ function load_mailbox(mailbox) {
                   });
                 }
               else {
-                  emailTableRow.append(add_text_to_element('td', sender));
-                  emailTableRow.append(add_text_to_element('td', subject));
-                  emailTableRow.append(add_text_to_element('td', timestamp));
+                  add_elements_to_table_row(emailTableRow, sender, subject, timestamp)
                   button.textContent = 'Archive';
                   emailTableRow.append(button);
                   button.addEventListener('click', function (event) {
@@ -171,11 +164,15 @@ function view_mail(id){
 
       const button = document.createElement('button');
       button.textContent = 'Reply';
+      button.className = 'btn btn-primary';
       parent.append(button);
       button.addEventListener('click', () => {
         compose_email();
         document.querySelector('#compose-recipients').value = email.sender;
-        document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
+        if (!email.subject.startsWith('Re: ')) {
+          email.subject = `Re: ${email.subject}`;
+        }
+        document.querySelector('#compose-subject').value = email.subject;
         document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
       });
 
@@ -236,4 +233,11 @@ function unarchive_email(id) {
     .then(() => {
         load_mailbox('inbox');
     });
+}
+
+// When a user submits the email composition form, add JavaScript code to actually send the email.
+function add_elements_to_table_row(emailTableRow, from_or_to, subject, timestamp) {
+    emailTableRow.append(add_text_to_element('td', from_or_to));
+    emailTableRow.append(add_text_to_element('td', subject));
+    emailTableRow.append(add_text_to_element('td', timestamp));
 }
