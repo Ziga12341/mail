@@ -82,7 +82,7 @@ function load_mailbox(mailbox) {
               const read = email.read;
               const recipients = email.recipients;
               const button = document.createElement('button');
-              button.className = 'btn btn-primary';
+              button.className = 'btn btn-primary btn-block';
 
               // Print each email in console
               // Create a row for the column names
